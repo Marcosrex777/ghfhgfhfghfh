@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            background-color: #f8f8f8;
+            border: none;
+            outline: none;
+            transition: 0.3s;
+            font-weight: 600;
+            color: #555;
+        }
+        .tab:hover {
+            background-color: #e9e9e9;
+        }
+        .tab.active {
+            background-color: white;
+            border-bottom: 3px solid #2e7d32;
+            color: #2e7d32;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        h1 {
+            font-size: 1.5em;
+            margin-top: 0;
+            color: #2e7d32;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="text"], input[type="number"], input[type="date"], select, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 80px;
+            resize: vertical;
+        }
+        button {
+            background-color: #2e7d32;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #1b5e20;
+        }
+        .divider {
+            border-top: 1px solid #e0e0e0;
+            margin: 15px 0;
+        }
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .stats-table th, .stats-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .stats-table th {
+            background-color: #f8f8f8;
+            color: #2e7d32;
+        }
+        .required::after {
+            content: " *";
+            color: #d32f2f;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background-color: #2e7d32;
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="notification" id="notification"></div>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab active" onclick="openTab(event, 'insertion')">Inserción</button>
+        <button class="tab" onclick="openTab(event, 'stock')">Búsqueda</button>
+        <button class="tab" onclick="openTab(event, 'history')">Historial</button>
+    </div>
+
+    <!-- Inserción -->
+    <div id="insertion" class="tab-content active">
+        <h1>Registro de Productos</h1>
+        <form id="product-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="product-code" class="required">Código</label>
+                    <input type="text" id="product-code" placeholder="Ingrese el código del producto" required>
+                </div>
+                <div class="form-group">
+                    <label for="product-name" class="required">Nombre</label>
+                    <input type="text" id="product-name" placeholder="Ingrese el nombre del producto" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="product-description">Descripción</label>
+                <textarea id="product-description" placeholder="Ingrese una descripción del producto"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="unit-price" class="required">Precio unitario</label>
+                    <input type="number" id="unit-price" placeholder="0.00" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label for="quantity" class="required">Cantidad</label>
+                    <input type="number" id="quantity" placeholder="0" min="0" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="unit-measure" class="required">Unidad de medida</label>
+                    <select id="unit-measure" required>
+                        <option value="">Seleccione una unidad</option>
+                        <option value="libra">Libra</option>
+                        <option value="quintal">Quintal</option>
+                        <option value="docena">Docena</option>
+                        <option value="litro">Litro</option>
+                        <option value="galon">Galón</option>
+                        <option value="unidad">Unidad</option>
+                        <option value="kg">Kilogramo</option>
+                        <option value="g">Gramo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="expiration-date">Fecha de expiración</label>
+                    <input type="date" id="expiration-date">
+                </div>
+            </div>
+
+            <button type="submit">Guardar Producto</button>
+        </form>
+    </div>
+
+    <!-- Búsqueda -->
+    <div id="stock" class="tab-content">
+        <h1>Búsqueda de Stock</h1>
+        <form>
+            <div class="form-group">
+                <label for="product-search">Buscar producto</label>
+                <input type="text" id="product-search" placeholder="Ingrese nombre o código del producto">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="current-stock">Stock actual</label>
+                    <input type="number" id="current-stock" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="unit-measure-stock">Unidad de medida</label>
+                    <input type="text" id="unit-measure-stock" disabled>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="last-restock">Precio unitario</label>
+                    <input type="number" id="last-restock" disabled>
+                </div>
+                <div class="form-group">
+                    <label for="next-restock">Fecha de caducidad</label>
+                    <input type="date" id="next-restock" disabled>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="button" id="search-button">Buscar</button>
+            </div>
+
+            <div id="search-result"></div>
+        </form>
+    </div>
+
+    <!-- Historial -->
+    <div id="history" class="tab-content">
+       
+    </div>
+</div>
+
+<script>
+const BASE_URL = "http://localhost:3002";
+
+// Notificación
+function showNotification(message, isSuccess = true) {
+    const notification = document.getElementById('notification');
+    notification.textContent = message;
+    notification.style.backgroundColor = isSuccess ? '#2e7d32' : '#d32f2f';
+    notification.style.display = 'block';
+    setTimeout(() => notification.style.display = 'none', 3000);
+}
+
+// Tabs
+function openTab(evt, tabName) {
+    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(tab => tab.classList.remove("active"));
+    document.getElementById(tabName).classList.add("active");
+    evt.currentTarget.classList.add("active");
+}
+
+// Envío del formulario
+document.getElementById('product-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const productData = {
+        nombre_producto: document.getElementById('product-name').value,
+        descripcion: document.getElementById('product-description').value,
+        precio_unitario: parseFloat(document.getElementById('unit-price').value),
+        stock: parseInt(document.getElementById('quantity').value),
+        unidad: document.getElementById('unit-measure').value,
+        fecha: document.getElementById('expiration-date').value || null
+    };
+
+    if (!productData.nombre_producto || isNaN(productData.precio_unitario) ||
+        isNaN(productData.stock) || !productData.unidad) {
+        showNotification('Por favor complete todos los campos requeridos', false);
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BASE_URL}/api/productos`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(productData)
+        });
+        const data = await response.json();
+        if (response.ok) {
+            showNotification('Producto guardado exitosamente');
+            document.getElementById('product-form').reset();
+        } else {
+            showNotification('Error al guardar: ' + (data.message || 'Desconocido'), false);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al conectar con el servidor', false);
+    }
+});
+
+// Búsqueda de productos
+document.getElementById('search-button').addEventListener('click', async () => {
+    const name = document.getElementById('product-search').value.trim();
+    if (!name) {
+        showNotification('Por favor, ingresa un nombre de producto');
+        return;
+    }
+
+    try {
+        const res = await fetch(`${BASE_URL}/api/productos/buscar?nombre=${encodeURIComponent(name)}`);
+        const data = await res.json();
+        if (!res.ok) {
+            showNotification(data.message || 'Error al buscar el producto');
+            return;
+        }
+
+        if (Array.isArray(data) && data.length > 0) {
+            const producto = data[0];
+            document.getElementById('current-stock').value = producto.stock || 0;
+            document.getElementById('unit-measure-stock').value = producto.unidad || '';
+            document.getElementById('last-restock').value = producto.precio_unitario || 0;
+            document.getElementById('next-restock').value = producto.fecha
+                ? new Date(producto.fecha).toISOString().split('T')[0] : '';
+        } else {
+            showNotification('Producto no encontrado');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showNotification('Error al buscar el producto');
+    }
+});
+</script>
+</body>
+</html>
